@@ -614,15 +614,21 @@ pub use traits::{Datelike, Timelike};
 #[doc(hidden)]
 pub use naive::__BenchYearFlags;
 
-/// Serialization/Deserialization with serde.
+/// Serialization/Deserialization with serde
 ///
-/// This module provides default implementations for `DateTime` using the [RFC 3339][1] format and various
-/// alternatives for use with serde's [`with` annotation][2].
+/// The [`DateTime`] type has default implementations for (de)serializing to/from the [RFC 3339]
+/// format. This module provides alternatives for serializing to timestamps.
+///
+/// The alternatives are for use with serde's [`with` annotation] combined with the module name.
+/// Alternatively the individual `serialize` and `deserialize` functions in each module can be used
+/// with serde's [`serialize_with`] and [`deserialize_with`] annotations.
 ///
 /// *Available on crate feature 'serde' only.*
 ///
-/// [1]: https://tools.ietf.org/html/rfc3339
-/// [2]: https://serde.rs/field-attrs.html#with
+/// [RFC 3339]: https://tools.ietf.org/html/rfc3339
+/// [`with` annotation]: https://serde.rs/field-attrs.html#with
+/// [`serialize_with`]: https://serde.rs/field-attrs.html#serialize_with
+/// [`deserialize_with`]: https://serde.rs/field-attrs.html#deserialize_with
 #[cfg(feature = "serde")]
 pub mod serde {
     use core::fmt;
@@ -716,15 +722,11 @@ macro_rules! try_opt {
 }
 
 /// Workaround because `.expect()` is not (yet) available in const context.
-#[macro_export]
-#[doc(hidden)]
-macro_rules! expect {
-    ($e:expr, $m:literal) => {
-        match $e {
-            Some(v) => v,
-            None => panic!($m),
-        }
-    };
+pub(crate) const fn expect<T: Copy>(opt: Option<T>, msg: &str) -> T {
+    match opt {
+        Some(val) => val,
+        None => panic!("{}", msg),
+    }
 }
 
 #[cfg(test)]
